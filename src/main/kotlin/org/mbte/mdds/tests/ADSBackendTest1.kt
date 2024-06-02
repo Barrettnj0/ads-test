@@ -6,6 +6,7 @@ import org.w3c.dom.Document
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import javax.xml.parsers.DocumentBuilderFactory
 
 fun main(args: Array<String>) {
 	val test = ADSBackendTest1()
@@ -24,6 +25,9 @@ fun main(args: Array<String>) {
 	 * 4. Retrieve all contacts from the Database
 	 * 5. Convert the contacts from the Database into Json and write to file
 	 */
+
+	val addressBookDocument = ADSBackendTest1().loadXml("src/main/resources/ab.xml")
+
 	
 	println("Assessment complete.")
 	println("Database file located at ${dbFile.absolutePath}")
@@ -55,19 +59,30 @@ interface AddressBookInterface {
 
 class ADSBackendTest1(): AddressBookInterface {
 	override fun loadXml(fileName: String): Document? {
-		TODO("Not yet implemented")
+		return DocumentBuilderFactory
+			.newInstance()
+			.newDocumentBuilder()
+			.parse(File(fileName))
 	}
 
 	override fun loadAddressBook(doc: Document): AddressBook {
 		TODO("Not yet implemented")
+		
+		// Take Document and convert each part to a Contact
+		// Take each contact and load them into AddressBook
+		// Return addressBook
+		// NOTE: addressBook returned will be used to make iterative calls to insertContact() in db handler
+
 	}
 
 	override fun convertToJson(addressBook: AddressBook): JSONObject {
 		TODO("Not yet implemented")
+		// Take addressBook and convert to JSON
 	}
 
 	override fun printOutput(json: JSONObject, output: File) {
 		TODO("Not yet implemented")
+		// Take addressBook json and write to a file
 	}
 
 }
