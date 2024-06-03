@@ -16,21 +16,13 @@ fun main(args: Array<String>) {
 	val time = dateFormatter.format(LocalDateTime.now()).replace(" ", "_").replace(":", ";")
 	// I changed this to a sqlite file extension here as I assume we want to use sqlite to query and view db
 	val dbFile = File(userHome, "${test.javaClass.simpleName}-$time.sqlite")
-//	dbFile.createNewFile()
+	dbFile.createNewFile()
 	val dbHandler = DatabaseHandler("jdbc:sqlite:${dbFile.absolutePath}")
 	dbHandler.initContactsTable()
 
 	// Create json path and file for each application start
 	val jsonFile = File("src/main/resources/addressbook.json")
 	jsonFile.createNewFile()
-
-	/**
-	 * 1. Load the xml file 'ab.xml'
-	 * 2. Load the address book contents from 'ab.xml'
-	 * 3. Insert each contact into the Database
-	 * 4. Retrieve all contacts from the Database
-	 * 5. Convert the contacts from the Database into Json and write to file
-	 */
 
 	// Create Document object based off of xml file from file path
 	val addressBookDocument = ADSBackendTest1().loadXml("src/main/resources/ab.xml")
@@ -50,8 +42,6 @@ fun main(args: Array<String>) {
 
 	// Get new address book from db
 	val dbAddressBook = AddressBook(dbHandler.getAllContacts())
-
-	println(dbAddressBook)
 
 	// Convert address book from database into json and store it in addressBookJson val
 	val addressBookJson = ADSBackendTest1().convertToJson(dbAddressBook)
