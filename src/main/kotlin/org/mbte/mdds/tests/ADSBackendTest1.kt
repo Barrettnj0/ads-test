@@ -14,10 +14,15 @@ fun main(args: Array<String>) {
 	val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 	val userHome = File(System.getProperty("user.home"))
 	val time = dateFormatter.format(LocalDateTime.now()).replace(" ", "_").replace(":", ";")
-	val dbFile = File(userHome, "${test.javaClass.simpleName}-$time.db")
-	dbFile.createNewFile()
+	// I changed this to a sqlite file extension here as I assume we want to use sqlite to query and view db
+	val dbFile = File(userHome, "${test.javaClass.simpleName}-$time.sqlite")
+//	dbFile.createNewFile()
 	val dbHandler = DatabaseHandler("jdbc:sqlite:${dbFile.absolutePath}")
 	dbHandler.initContactsTable()
+
+	// Create json path and file for each application start
+	val jsonFile = File("src/main/resources/addressbook.json")
+	jsonFile.createNewFile()
 
 	/**
 	 * 1. Load the xml file 'ab.xml'
@@ -43,9 +48,20 @@ fun main(args: Array<String>) {
 		dbHandler.insertContact(contact)
 	}
 
+	// Get new address book from db
+	val dbAddressBook = AddressBook(dbHandler.getAllContacts())
+
+	println(dbAddressBook)
+
+	// Convert address book from database into json and store it in addressBookJson val
+	val addressBookJson = ADSBackendTest1().convertToJson(dbAddressBook)
+
+	// Use printOutput to print addressBookJson to jsonFile filepath
+	ADSBackendTest1().printOutput(addressBookJson, jsonFile)
+
 	println("Assessment complete.")
 	println("Database file located at ${dbFile.absolutePath}")
-//	println("JSON output located at ${output.absolutePath}")
+	println("JSON output located at ${jsonFile.absolutePath}")
 }
 
 data class AddressBook(val contacts: List<Contact>)
@@ -135,17 +151,14 @@ class ADSBackendTest1(): AddressBookInterface {
 		}
 
 		return AddressBook(contactList)
-		// NOTE: addressBook returned will be used to make iterative calls to insertContact() in db handler
 	}
 
 	override fun convertToJson(addressBook: AddressBook): JSONObject {
-		TODO("Not yet implemented")
-		// Take addressBook and convert to JSON
+		val addressBookJson = JSONObject()
+		addressBookJson.put("contactList", addressBook.contacts)
+		return addressBookJson
 	}
 
-	override fun printOutput(json: JSONObject, output: File) {
-		TODO("Not yet implemented")
-		// Take addressBook json and write to a file
-	}
+	override fun printOutput(json: JSONObject, output: File) { output.writeText(json.toString()) }
 
 }
