@@ -3,6 +3,7 @@ package org.mbte.mdds.tests
 import org.json.JSONObject
 import org.mbte.mdds.util.DatabaseHandler
 import org.w3c.dom.Document
+import org.w3c.dom.Element
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -27,11 +28,12 @@ fun main(args: Array<String>) {
 	 */
 
 	val addressBookDocument = ADSBackendTest1().loadXml("src/main/resources/ab.xml")
+	var addressBook = AddressBook(ArrayList())
 
-	
-	println("Assessment complete.")
-	println("Database file located at ${dbFile.absolutePath}")
-//	println("JSON output located at ${output.absolutePath}")
+	if (addressBookDocument != null) {
+		addressBook = ADSBackendTest1().loadAddressBook(addressBookDocument)
+	}
+
 }
 
 data class AddressBook(val contacts: List<Contact>)
@@ -66,13 +68,62 @@ class ADSBackendTest1(): AddressBookInterface {
 	}
 
 	override fun loadAddressBook(doc: Document): AddressBook {
-		TODO("Not yet implemented")
-		
-		// Take Document and convert each part to a Contact
-		// Take each contact and load them into AddressBook
-		// Return addressBook
-		// NOTE: addressBook returned will be used to make iterative calls to insertContact() in db handler
+		val contactList = ArrayList<Contact>()
 
+		doc.documentElement?.normalize()
+		val root = doc.documentElement
+		val nodeList = root?.childNodes
+
+		var i = 0
+		while (i < nodeList?.length!!) {
+			val contactAttributeMap = LinkedHashMap<Int, String>()
+
+			val node = nodeList.item(i)
+			if (node.nodeType == Document.ELEMENT_NODE) {
+				val element = node as Element
+
+				val attributes = element.childNodes
+				var j = 1
+				while (j < attributes.length) {
+					val attribute = attributes.item(j)
+
+					when (attribute.nodeName) {
+						"CustomerID" -> contactAttributeMap[0] = attribute.textContent
+						"CompanyName" -> contactAttributeMap[1] = attribute.textContent
+						"ContactName" -> contactAttributeMap[2] = attribute.textContent
+						"ContactTitle" -> contactAttributeMap[3] = attribute.textContent
+						"Address" -> contactAttributeMap[4] = attribute.textContent
+						"City" -> contactAttributeMap[5] = attribute.textContent
+						"Email" -> contactAttributeMap[6] = attribute.textContent
+						"Region" -> contactAttributeMap[7] = attribute.textContent
+						"PostalCode" -> contactAttributeMap[8] = attribute.textContent
+						"Country" -> contactAttributeMap[9] = attribute.textContent
+						"Phone" -> contactAttributeMap[10] = attribute.textContent
+						"Fax" -> contactAttributeMap[11] = attribute.textContent
+					}
+					j += 2
+				}
+
+				contactList.add(Contact(
+					contactAttributeMap[0].toString(),
+					contactAttributeMap[1].toString(),
+					contactAttributeMap[2].toString(),
+					contactAttributeMap[3].toString(),
+					contactAttributeMap[4].toString(),
+					contactAttributeMap[5].toString(),
+					contactAttributeMap[6].toString(),
+					contactAttributeMap[7],
+					contactAttributeMap[8],
+					contactAttributeMap[9].toString(),
+					contactAttributeMap[10].toString(),
+					contactAttributeMap[11]
+				))
+			}
+			i += 1
+		}
+
+		return AddressBook(contactList)
+		// NOTE: addressBook returned will be used to make iterative calls to insertContact() in db handler
 	}
 
 	override fun convertToJson(addressBook: AddressBook): JSONObject {
