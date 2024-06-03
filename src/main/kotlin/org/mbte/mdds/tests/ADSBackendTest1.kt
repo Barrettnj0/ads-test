@@ -27,13 +27,25 @@ fun main(args: Array<String>) {
 	 * 5. Convert the contacts from the Database into Json and write to file
 	 */
 
+	// Create Document object based off of xml file from file path
 	val addressBookDocument = ADSBackendTest1().loadXml("src/main/resources/ab.xml")
+
+	// Instantiate an AddressBook variable to be replaced
 	var addressBook = AddressBook(ArrayList())
 
+	// Use null check then replace instantiated addressBook var
 	if (addressBookDocument != null) {
 		addressBook = ADSBackendTest1().loadAddressBook(addressBookDocument)
 	}
 
+	// Iterate through xml contacts to fill SQLite table
+	for (contact in addressBook.contacts) {
+		dbHandler.insertContact(contact)
+	}
+
+	println("Assessment complete.")
+	println("Database file located at ${dbFile.absolutePath}")
+//	println("JSON output located at ${output.absolutePath}")
 }
 
 data class AddressBook(val contacts: List<Contact>)
