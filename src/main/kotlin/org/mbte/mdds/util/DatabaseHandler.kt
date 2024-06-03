@@ -24,26 +24,12 @@ class DatabaseHandler(private val url: String) {
 
     fun insertContact(contact: Contact) {
         getConnection()?.use { connection ->
-            // Creates values for contact inputed
-            val contactId = contact.id
-            val contactCompanyName = contact.companyName
-            val contactName = contact.name
-            val contactTitle = contact.title
-            val contactAddress = contact.address
-            val contactCity = contact.city
-            val contactEmail = contact.email
-            val contactRegion = contact.region
-            val contactZip = contact.zip
-            val contactCountry = contact.country
-            val contactPhone = contact.phone
-            val contactFax = contact.fax
-
             val statement = connection.createStatement()
             // Inserts new contacts with prepared statement using values
-            val sql = "INSERT INTO Contacts (customer_id, company_name, name, title, address, city, email, region, country, phone, fax)" +
-                    "VALUES (customer_id=$contactId, company_name=$contactCompanyName, name=$contactName, title=$contactTitle" +
-                    ", address=$contactAddress, city=$contactCity, email=$contactEmail, region=$contactRegion, zip=$contactZip" +
-                    ", country=$contactCountry, phone=$contactPhone, fax=$contactFax);"
+            val sql = """INSERT INTO Contacts (customer_id, company_name, name, title, address, city, email, region, zip, country, phone, fax)""" +
+                    """ VALUES ("${contact.id}", "${contact.companyName}", "${contact.name}", "${contact.title}"""" +
+                    """, "${contact.address}", "${contact.city}", "${contact.email}", "${contact.region}", "${contact.zip}"""" +
+                    """, "${contact.country}", "${contact.phone}", "${contact.fax}");"""
 			kotlin.runCatching { statement.executeUpdate(sql) }
 				.onFailure { 
 					System.err.println("Failed to execute SQL: $sql")
